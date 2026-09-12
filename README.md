@@ -32,7 +32,7 @@ Leave that terminal open. In a browser go to **http://127.0.0.1:8765**. Stop the
 
 ### On the internet (share with the whole team)
 
-The site is four static files in `docs/` (`index.html`, `sim.js`, `ui.js`, `app.css`). There is no login and no database.
+The site is static files in `docs/` (`index.html`, `sim.js`, `ui.js`, `view3d.js`, `app.css`, plus `vendor/` for the 3D camera). There is no login and no database.
 
 A repo admin still has to flip Pages on once (GitHub will not do it from a workflow by itself):
 
@@ -46,7 +46,7 @@ Until Pages is on, use the local steps above. You can also drop the `docs/` fold
 
 1. **Set the sliders from practice** with the real robot (see the table below).
 2. Pick a **Red strategy** and a **Blue strategy**.
-3. **Watch one match** — a replay of one simulated match. Yellow balls are POLLEN (anyone). Red/blue balls are NECTAR (that alliance only).
+3. **Watch one match** — a replay of one simulated match. Use **3D field** (drag to orbit, scroll to zoom) or **2D map**. Yellow balls are POLLEN (anyone). Red/blue balls are NECTAR (that alliance only).
 4. **Simulate 400 matches** — which plan wins *for your miss/pickup numbers*.
 5. **Map: what to focus on** — heatmaps of hive accuracy vs pickup time, and hive accuracy vs flower accuracy.
 

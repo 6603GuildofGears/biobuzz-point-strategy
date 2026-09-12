@@ -46,10 +46,20 @@ button.secondary { background: #4a3722; color: var(--ink); }
 button:disabled { opacity: 0.55; cursor: wait; }
 .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9rem; color: var(--muted); }
 .check input { width: auto; }
+.view-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 8px; }
+.view-toggle { display: flex; gap: 6px; }
+.view-toggle button, button.slim {
+  width: auto; margin-top: 0; padding: 6px 12px;
+}
+.view-toggle button.active, button.active {
+  background: var(--gold); color: #1a1208;
+}
+.view-bar .hint { margin: 0; }
 .stage-wrap {
   background: #111; border-radius: 12px; padding: 8px; display: flex; justify-content: center;
 }
-canvas { width: min(100%, 720px); height: auto; background: #0e0e0e; border-radius: 8px; }
+canvas { width: min(100%, 960px); height: auto; background: #0e0e0e; border-radius: 8px; }
+canvas[hidden] { display: none; }
 .scores { display: flex; gap: 10px; margin: 10px 0; }
 .scores div { flex: 1; padding: 10px; border-radius: 10px; text-align: center; }
 .scores .r { background: #4a1515; }

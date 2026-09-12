@@ -743,8 +743,22 @@
         k: e.kind === "pollen" ? 0 : 1, c: e.color === "red" ? 1 : e.color === "blue" ? 2 : 0, x: Math.round(e.x), y: Math.round(e.y),
       })),
       hives: {
-        red: { tips: this.tips(this.hives.red), up: this.hives.red.upA ? "a" : "b", tipping: this.hives.red.tipping, n: this.up(this.hives.red).length },
-        blue: { tips: this.tips(this.hives.blue), up: this.hives.blue.upA ? "a" : "b", tipping: this.hives.blue.tipping, n: this.up(this.hives.blue).length },
+        red: {
+          tips: this.tips(this.hives.red), up: this.hives.red.upA ? "a" : "b", tipping: this.hives.red.tipping,
+          n: this.up(this.hives.red).length,
+          cell: this.up(this.hives.red).map((id) => {
+            const e = self.el(id);
+            return [e.kind === "pollen" ? 0 : 1, e.color === "red" ? 1 : e.color === "blue" ? 2 : 0];
+          }),
+        },
+        blue: {
+          tips: this.tips(this.hives.blue), up: this.hives.blue.upA ? "a" : "b", tipping: this.hives.blue.tipping,
+          n: this.up(this.hives.blue).length,
+          cell: this.up(this.hives.blue).map((id) => {
+            const e = self.el(id);
+            return [e.kind === "pollen" ? 0 : 1, e.color === "red" ? 1 : e.color === "blue" ? 2 : 0];
+          }),
+        },
       },
       flowers: this.flowers.map((st) => st.map((id) => {
         const e = self.el(id);

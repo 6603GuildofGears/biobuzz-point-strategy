@@ -1,3 +1,5 @@
+import "./view3d.js";
+
 (function () {
   const B = window.Biobuzz;
   const canvas = document.getElementById("c");
@@ -115,6 +117,34 @@
 
   drawField();
 
+  const view3d = window.Biobuzz3D;
+  let viewMode = (view3d && view3d.ok) ? "3d" : "2d";
+  const btn2d = document.getElementById("btn2d");
+  const btn3d = document.getElementById("btn3d");
+  const btnCam = document.getElementById("btnCam");
+  const canvas3d = document.getElementById("c3d");
+
+  function applyView() {
+    const can3d = !!(view3d && view3d.ok);
+    if (!can3d) viewMode = "2d";
+    if (btn3d) btn3d.disabled = !can3d;
+    if (btnCam) btnCam.hidden = viewMode !== "3d";
+    const hint = document.getElementById("viewHint");
+    if (hint) hint.hidden = viewMode !== "3d";
+    if (btn2d) btn2d.classList.toggle("active", viewMode === "2d");
+    if (btn3d) btn3d.classList.toggle("active", viewMode === "3d");
+    canvas.hidden = viewMode !== "2d";
+    if (view3d && view3d.ok) view3d.setVisible(viewMode === "3d");
+    else if (canvas3d) canvas3d.hidden = true;
+    if (viewMode === "2d") {
+      if (replay && replay.frames && replay.frames[idx]) draw(replay.frames[idx]);
+      else drawField();
+    }
+  }
+  if (btn2d) btn2d.onclick = function () { viewMode = "2d"; applyView(); };
+  if (btn3d) btn3d.onclick = function () { if (view3d && view3d.ok) { viewMode = "3d"; applyView(); } };
+  if (btnCam) btnCam.onclick = function () { if (view3d && view3d.resetCamera) view3d.resetCamera(); };
+
   const selR = document.getElementById("redStrat");
   const selB = document.getElementById("blueStrat");
   Object.keys(B.STRATEGIES).forEach((k) => {
@@ -170,12 +200,14 @@
   }
 
   let replay = null, idx = 0, playing = false, acc = 0;
+  applyView();
 
   function showFrame(i) {
     if (!replay || !replay.frames.length) return;
     idx = Math.max(0, Math.min(replay.frames.length - 1, i));
     const f = replay.frames[idx];
     draw(f);
+    if (view3d && view3d.ok) view3d.setFrame(f);
     document.getElementById("rs").textContent = f.score.red;
     document.getElementById("bs").textContent = f.score.blue;
     const n = f.nectar || { red: { grab: 0, held: 0, cell: 3, flower: 0, off: 5 }, blue: { grab: 0, held: 0, cell: 3, flower: 0, off: 5 } };
