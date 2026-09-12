@@ -3,8 +3,9 @@
 Scoring, timing, possession, and field sizes come from the BIOBUZZ Competition
 Manual V1 (12 Sep 2026), Tables 10-2 and 10-3 and sections 9–11.
 
-The **website** (`docs/index.html`) is the product. Python (`python -m biobuzz`)
-is optional. The browser engine in `docs/sim.js` is a port of `src/biobuzz/sim.py`.
+The **website** (`docs/index.html`) is the product. Watch a match in **3D** or
+on the 2D map; both use the same engine (`docs/sim.js`, ported from
+`src/biobuzz/sim.py`). Python (`python -m biobuzz`) is optional.
 
 ## Encoded as rules
 

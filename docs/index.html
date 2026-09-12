@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>BIOBUZZ strategy lab</h1>
-    <p>FTC 2026–2027. Set how often the robots miss and how long pickup takes, run thousands of matches in this browser, and watch a few of them. No install.</p>
+    <p>FTC 2026–2027. Set how often the robots miss and how long pickup takes, run thousands of matches in this browser, and watch a few of them. No install. Watch in <strong>3D</strong> (drag to orbit) or a 2D map.</p>
     <p class="rule">Red robots pick up <strong>red NECTAR</strong> only. Blue robots pick up <strong>blue NECTAR</strong> only. Yellow POLLEN is shared. Each alliance has a private pool of 8 nectar — you cannot steal theirs to tip the hive or dunk flowers.</p>
   </header>
   <div class="layout">
@@ -57,7 +57,18 @@
         <span class="red-n">Red NECTAR — red robots only</span>
         <span class="blue-n">Blue NECTAR — blue robots only</span>
       </div>
-      <div class="stage-wrap"><canvas id="c" width="720" height="720"></canvas></div>
+      <div class="view-bar">
+        <div class="view-toggle" role="group" aria-label="Field view">
+          <button type="button" id="btn2d" class="secondary">2D map</button>
+          <button type="button" id="btn3d" class="secondary active">3D field</button>
+        </div>
+        <button type="button" id="btnCam" class="secondary slim">Reset camera</button>
+        <p class="clock hint" id="viewHint">Drag to orbit · scroll to zoom · right-drag to pan</p>
+      </div>
+      <div class="stage-wrap">
+        <canvas id="c" width="720" height="720" hidden></canvas>
+        <canvas id="c3d" width="960" height="600"></canvas>
+      </div>
       <div class="log" id="log"></div>
 
       <h2>What should we focus on?</h2>
@@ -81,7 +92,14 @@
       </footer>
     </main>
   </div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.min.js"
+    }
+  }
+  </script>
   <script src="sim.js"></script>
-  <script src="ui.js"></script>
+  <script type="module" src="ui.js"></script>
 </body>
 </html>
