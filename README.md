@@ -34,11 +34,11 @@ Leave that terminal open. In a browser go to **http://127.0.0.1:8765**. Stop the
 
 The site is four static files in `docs/` (`index.html`, `sim.js`, `ui.js`, `app.css`). There is no login and no database.
 
-A repo admin still has to flip Pages on once (this repo’s workflow cannot do it by itself):
+A repo admin still has to flip Pages on once (GitHub will not do it from a workflow by itself):
 
 1. GitHub repo **Settings → Pages**
-2. Source **GitHub Actions**, *or* Deploy from branch **`main`** / folder **`/docs`**
-3. After that, the public URL is typically https://6603guildofgears.github.io/biobuzz-point-strategy/
+2. Deploy from branch **`main`**, folder **`/docs`**
+3. After a minute, the public URL is typically https://6603guildofgears.github.io/biobuzz-point-strategy/
 
 Until Pages is on, use the local steps above. You can also drop the `docs/` folder onto Netlify, Cloudflare Pages, or a USB stick plus the one-line server.
 
