@@ -10,12 +10,24 @@ from typing import Any
 from . import field, rules
 from .field import clamp_to_field, dist
 from .scoring import AllianceBreakdown, MatchScore, score_flower_stack
-from .skills import Skill, SKILLS
+from .skills import Skill, resolve_skill, skill_label
 from .strategies import Strategy, STRATEGIES
 from .rules import PhysicsAssumptions, DEFAULT_PHYSICS, pollen_equiv
 
 
 ALLIANCES = ("red", "blue")
+
+
+def _caps_dict(skill: Skill) -> dict[str, float]:
+    return {
+        "hive_accuracy": skill.hive_accuracy,
+        "flower_pollen_accuracy": skill.flower_pollen_accuracy,
+        "flower_nectar_accuracy": skill.flower_nectar_accuracy,
+        "intake_s": skill.intake_s,
+        "launch_s": skill.launch_s,
+        "intake_reliability": skill.intake_reliability,
+        "speed_in_s": skill.speed_in_s,
+    }
 
 
 @dataclass
@@ -107,8 +119,8 @@ class World:
 class MatchSim:
     def __init__(
         self,
-        red_skill: str,
-        blue_skill: str,
+        red_skill: str | Skill,
+        blue_skill: str | Skill,
         red_strategy: str,
         blue_strategy: str,
         seed: int = 0,
@@ -123,18 +135,20 @@ class MatchSim:
         self.rng = random.Random(seed)
         self.world = self._setup(red_skill, blue_skill, red_strategy, blue_strategy)
         self.meta = {
-            "red_skill": red_skill,
-            "blue_skill": blue_skill,
+            "red_skill": skill_label(red_skill),
+            "blue_skill": skill_label(blue_skill),
             "red_strategy": red_strategy,
             "blue_strategy": blue_strategy,
             "seed": seed,
             "physics": asdict(self.physics),
+            "red_caps": _caps_dict(resolve_skill(red_skill)),
+            "blue_caps": _caps_dict(resolve_skill(blue_skill)),
         }
 
     def _note(self, text: str) -> None:
         self.world.events.append({"t": round(self.world.play_t, 2), "text": text})
 
-    def _setup(self, red_skill: str, blue_skill: str, red_strategy: str, blue_strategy: str) -> World:
+    def _setup(self, red_skill: str | Skill, blue_skill: str | Skill, red_strategy: str, blue_strategy: str) -> World:
         w = World(rng=self.rng, physics=self.physics)
         w.hives = {"red": Hive("red"), "blue": Hive("blue")}
         w.flowers = [[] for _ in range(rules.FLOWERS)]
@@ -169,7 +183,7 @@ class MatchSim:
             for _ in range(5):
                 add("nectar", color, -10.0, -10.0, "off_field", 0)
 
-        skills = {"red": SKILLS[red_skill], "blue": SKILLS[blue_skill]}
+        skills = {"red": resolve_skill(red_skill), "blue": resolve_skill(blue_skill)}
         strats = {"red": STRATEGIES[red_strategy], "blue": STRATEGIES[blue_strategy]}
         idx = 0
         for color in ALLIANCES:
@@ -246,6 +260,7 @@ class MatchSim:
             self._act(bot)
         self._separate_robots()
         self._update_park_leave()
+        self._assert_alliance_nectar()
 
     def _settle_elements(self) -> None:
         for el in self.world.elements:
@@ -662,6 +677,7 @@ class MatchSim:
             bot.intent = "idle"
             return
         el = w.el(bot.target_eid)
+        # G408: cannot CONTROL opponent-color NECTAR. POLLEN is shared.
         if el.kind == "nectar" and el.color != bot.alliance:
             bot.intent = "idle"
             return
@@ -769,6 +785,16 @@ class MatchSim:
         bot.inventory.append(bottom.eid)
 
     # --- queries -----------------------------------------------------------
+    def _assert_alliance_nectar(self) -> None:
+        """G408: robots never CONTROL NECTAR of the other alliance's color."""
+        for bot in self.world.robots:
+            for eid in bot.inventory:
+                el = self.world.el(eid)
+                if el.kind == "nectar" and el.color != bot.alliance:
+                    raise AssertionError(
+                        f"G408: robot {bot.idx} ({bot.alliance}) holds {el.color} nectar {eid}"
+                    )
+
     def _inv_has(self, bot: Robot, kind: str) -> bool:
         return any(
             self.world.el(i).kind == kind

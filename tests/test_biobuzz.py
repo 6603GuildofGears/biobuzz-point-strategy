@@ -99,6 +99,39 @@ def test_small_batch_runs():
     assert "developing" in summary["by_skill"]
 
 
+def test_apply_caps_keeps_accuracies_independent_of_intake():
+    from biobuzz.skills import apply_caps
+    slow = apply_caps(hive_accuracy=0.4, flower_accuracy=0.8, intake_s=3.5)
+    fast = apply_caps(hive_accuracy=0.4, flower_accuracy=0.8, intake_s=0.8)
+    assert slow.hive_accuracy == fast.hive_accuracy == 0.4
+    assert slow.flower_pollen_accuracy == fast.flower_pollen_accuracy == 0.8
+    assert slow.intake_s == 3.5
+    assert fast.intake_s == 0.8
+    assert slow.launch_s > fast.launch_s
+    assert slow.flower_nectar_accuracy < slow.flower_pollen_accuracy
+
+
+def test_robots_never_hold_opponent_nectar():
+    """G408: red never inventories blue nectar, and vice versa, for a full match."""
+    matchups = (
+        ("nectar_tips", "flower_focus"),
+        ("hive_then_flower", "nectar_tips"),
+        ("flower_focus", "hive_cycle"),
+    )
+    for seed, (red_s, blue_s) in enumerate(matchups, start=3):
+        sim = MatchSim("competitive", "competitive", red_s, blue_s, seed=seed)
+        sim.run()
+        for bot in sim.world.robots:
+            for eid in bot.inventory:
+                el = sim.world.el(eid)
+                if el.kind == "nectar":
+                    assert el.color == bot.alliance
+        red_n = [e for e in sim.world.elements if e.kind == "nectar" and e.color == "red"]
+        blue_n = [e for e in sim.world.elements if e.kind == "nectar" and e.color == "blue"]
+        assert len(red_n) == rules.NECTAR_PER_ALLIANCE
+        assert len(blue_n) == rules.NECTAR_PER_ALLIANCE
+
+
 def test_match_points_nonnegative_and_clock_completes():
     sim = MatchSim("competitive", "developing", "hive_then_flower", "nectar_tips", seed=8)
     score = sim.run()

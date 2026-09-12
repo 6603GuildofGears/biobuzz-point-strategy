@@ -134,6 +134,37 @@ def cmd_watch(args: argparse.Namespace) -> int:
     return 0
 
 
+def _docs_dir() -> Path:
+    here = Path(__file__).resolve()
+    for candidate in (here.parents[2] / "docs", here.parents[1] / "docs", Path.cwd() / "docs"):
+        if (candidate / "index.html").exists():
+            return candidate
+    raise SystemExit("Could not find docs/index.html. Run from the repo checkout.")
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    import http.server
+    import os
+    import webbrowser
+
+    docs = _docs_dir()
+    os.chdir(docs)
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", args.port), http.server.SimpleHTTPRequestHandler)
+    url = f"http://127.0.0.1:{args.port}/"
+    print(f"BIOBUZZ lab at {url}")
+    print("This is a static site. Copy the docs/ folder to GitHub Pages, Netlify, or any host.")
+    if not args.no_open:
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopped.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="biobuzz",
@@ -164,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--nectar-mass", type=float, default=rules.DEFAULT_PHYSICS.nectar_mass_ratio)
     w.add_argument("--out", default="output/replays/one.html")
     w.set_defaults(func=cmd_watch)
+
+    sv = sub.add_parser("serve", help="Open the browser app locally (static docs/ site)")
+    sv.add_argument("--port", type=int, default=8765)
+    sv.add_argument("--no-open", action="store_true")
+    sv.set_defaults(func=cmd_serve)
     return p
 
 

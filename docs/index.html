@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BIOBUZZ strategy lab</title>
+  <link rel="stylesheet" href="app.css"/>
+</head>
+<body>
+  <header>
+    <h1>BIOBUZZ strategy lab</h1>
+    <p>FTC 2026–2027. Set how often the robots miss and how long pickup takes, run thousands of matches in this browser, and watch a few of them. No install.</p>
+    <p class="rule">Red robots pick up <strong>red NECTAR</strong> only. Blue robots pick up <strong>blue NECTAR</strong> only. Yellow POLLEN is shared. Each alliance has a private pool of 8 nectar — you cannot steal theirs to tip the hive or dunk flowers.</p>
+  </header>
+  <div class="layout">
+    <aside>
+      <h2>Your robot (red)</h2>
+      <label>Hive shot hit rate <span class="val" id="vHive">60%</span></label>
+      <input id="hiveAcc" type="range" min="20" max="95" value="60"/>
+      <label>Flower dunk hit rate <span class="val" id="vFlower">40%</span></label>
+      <input id="flowerAcc" type="range" min="10" max="90" value="40"/>
+      <label>Time to pick up one ball <span class="val" id="vIntake">2.2s</span></label>
+      <input id="intakeS" type="range" min="6" max="40" value="22"/>
+      <label>Intake success rate <span class="val" id="vRel">80%</span></label>
+      <input id="intakeRel" type="range" min="50" max="98" value="80"/>
+
+      <label>Red strategy</label>
+      <select id="redStrat"></select>
+      <label>Blue strategy</label>
+      <select id="blueStrat"></select>
+      <label class="check"><input type="checkbox" id="sameCaps" checked/> Opponent uses the same miss/pickup numbers</label>
+
+      <div id="blueCaps" hidden>
+        <h2>Opponent (blue)</h2>
+        <label>Hive hit rate <span class="val" id="vHiveB">60%</span></label>
+        <input id="hiveAccB" type="range" min="20" max="95" value="60"/>
+        <label>Flower hit rate <span class="val" id="vFlowerB">40%</span></label>
+        <input id="flowerAccB" type="range" min="10" max="90" value="40"/>
+        <label>Pickup time <span class="val" id="vIntakeB">2.2s</span></label>
+        <input id="intakeSB" type="range" min="6" max="40" value="22"/>
+      </div>
+
+      <button id="btnWatch">Watch one match</button>
+      <button class="secondary" id="btnMany">Simulate 400 matches</button>
+      <button class="secondary" id="btnSweep">Map: what to focus on</button>
+      <div class="progress" id="prog" hidden><div id="progBar"></div></div>
+      <p class="clock" id="status"></p>
+    </aside>
+    <main>
+      <div class="scores">
+        <div class="r">RED<strong id="rs">0</strong><span id="rsub">hive cycling</span></div>
+        <div class="b">BLUE<strong id="bs">0</strong><span id="bsub">flower focus</span></div>
+      </div>
+      <p class="clock" id="clock">Press “Watch one match” to play a replay.</p>
+      <div class="nectar-hud" id="nectarHud">
+        <span class="pollen-n">POLLEN — anyone</span>
+        <span class="red-n">Red NECTAR — red robots only</span>
+        <span class="blue-n">Blue NECTAR — blue robots only</span>
+      </div>
+      <div class="stage-wrap"><canvas id="c" width="720" height="720"></canvas></div>
+      <div class="log" id="log"></div>
+
+      <h2>What should we focus on?</h2>
+      <p class="clock">A HIVE TIP is 20 points. An owned FLOWER element is 2. Missed shots and slow intakes waste cycle time — that usually matters more than perfect field physics. NECTAR dunks are harder (3.6 in ball, 4 in hole). Flower ownership is “last nectar of <em>your</em> color on top”; you can still steal a flower by dunking yours, but you cannot pick up theirs.</p>
+      <div class="cards" id="recCards"></div>
+      <div id="manyTable"></div>
+
+      <h2>Hive accuracy vs pickup time</h2>
+      <p class="clock">Each cell is the best strategy when both alliances have those numbers. Flower dunks held at 40%, intake success 80%.</p>
+      <div class="legend" id="legend"></div>
+      <div class="heat" id="heatIntake"></div>
+
+      <h2>Hive accuracy vs flower accuracy</h2>
+      <p class="clock">Pickup held at 2.2s. This is the “should we even build a flower mechanism?” chart.</p>
+      <div class="heat" id="heatFlower"></div>
+
+      <footer>
+        Scoring from the BIOBUZZ Competition Manual V1 (Tables 10-2 and 10-3).
+        Hive tip mass is an assumption (8 pollen-equivalents).
+        Host this folder on GitHub Pages, Netlify, or any static host — or run <code>python -m biobuzz serve</code>.
+      </footer>
+    </main>
+  </div>
+  <script src="sim.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>

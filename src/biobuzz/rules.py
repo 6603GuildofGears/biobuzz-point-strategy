@@ -22,6 +22,10 @@ FIELD_IN = 144.0
 POSSESSION_LIMIT = 4
 POLLEN_COUNT = 40
 NECTAR_PER_ALLIANCE = 8
+# G408: a ROBOT may not CONTROL NECTAR of the opponent alliance color.
+# POLLEN is yellow/neutral — either alliance may use it. Each alliance has
+# a private pool of 8 NECTAR (3 start in their upward CELL, 5 enter via
+# the LOADING ZONE). You cannot steal theirs to tip your HIVE or dunk flowers.
 FLOWERS = 4
 ROBOTS_PER_ALLIANCE = 2
 

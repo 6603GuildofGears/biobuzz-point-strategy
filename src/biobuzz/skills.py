@@ -8,7 +8,7 @@ and launching into a ~20x14 in CELL vs dunking into a 4 in FLOWER opening.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -117,3 +117,65 @@ SKILL_HELP = {
     "competitive": "Solid regional / state-level robot.",
     "elite": "Worlds-level cycle speed and reliability.",
 }
+
+# Named portraits stay useful, but the question that actually changes the
+# build is: how often do we miss, and how long does pickup take?
+HIVE_ACCURACY_GRID = (0.30, 0.45, 0.60, 0.75, 0.90)
+FLOWER_ACCURACY_GRID = (0.20, 0.40, 0.60, 0.80)
+INTAKE_S_GRID = (3.5, 2.2, 1.4, 0.8)
+INTAKE_RELIABILITY_GRID = (0.60, 0.80, 0.95)
+
+
+def resolve_skill(skill: str | Skill) -> Skill:
+    if isinstance(skill, Skill):
+        return skill
+    try:
+        return SKILLS[skill]
+    except KeyError as exc:
+        raise SystemExit(f"Unknown skill {skill}. Choose from: {', '.join(SKILLS)}") from exc
+
+
+def skill_label(skill: str | Skill) -> str:
+    if isinstance(skill, str):
+        return skill
+    return skill.name
+
+
+def apply_caps(
+    base: str | Skill = "developing",
+    *,
+    hive_accuracy: float | None = None,
+    flower_accuracy: float | None = None,
+    intake_s: float | None = None,
+    intake_reliability: float | None = None,
+    launch_s: float | None = None,
+) -> Skill:
+    """Same chassis as `base`, with the manipulation knobs students can measure.
+
+    Slow pickup also stretches launch and flower-place times (a clumsy cycle),
+    unless `launch_s` is set explicitly. Accuracies stay independent: a robot
+    can be slow-and-careful or fast-and-wild.
+    """
+    s = resolve_skill(base)
+    new_intake = s.intake_s if intake_s is None else intake_s
+    scale = new_intake / max(0.2, s.intake_s)
+    flower_pollen = s.flower_pollen_accuracy if flower_accuracy is None else flower_accuracy
+    # 3.6 in NECTAR into a 4 in hole is strictly harder than 2.8 in POLLEN.
+    flower_nectar = max(0.05, min(0.95, flower_pollen * 0.62 + 0.04))
+    name = (
+        f"hive{int(round((hive_accuracy if hive_accuracy is not None else s.hive_accuracy)*100))}"
+        f"_flw{int(round(flower_pollen*100))}"
+        f"_in{new_intake:.1f}"
+    )
+    return replace(
+        s,
+        name=name,
+        hive_accuracy=s.hive_accuracy if hive_accuracy is None else hive_accuracy,
+        flower_pollen_accuracy=flower_pollen,
+        flower_nectar_accuracy=flower_nectar,
+        intake_s=new_intake,
+        launch_s=s.launch_s * scale if launch_s is None else launch_s,
+        flower_place_s=s.flower_place_s * scale,
+        flower_extract_s=s.flower_extract_s * scale,
+        intake_reliability=s.intake_reliability if intake_reliability is None else intake_reliability,
+    )
